@@ -52,15 +52,15 @@ def lambda_handler(event, _context):
             cur.close()
 
 
-test_event = {
-    "body": json.dumps({
-        "id": 2,
-        "marca": "Marca 2",
-        "modelo": "Modelo 2",
-        "tipo": "Tipo 2",
-        "color": "Color 2"
-    })
-}
-test_context = None
-
-print(lambda_handler(test_event, test_context))
+# test_event = {
+#     "body": json.dumps({
+#         "id": 2,
+#         "marca": "Marca 2",
+#         "modelo": "Modelo 2",
+#         "tipo": "Tipo 2",
+#         "color": "Color 2"
+#     })
+# }
+# test_context = None
+#
+# print(lambda_handler(test_event, test_context))

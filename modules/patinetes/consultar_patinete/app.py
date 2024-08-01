@@ -36,11 +36,11 @@ def lambda_handler(event, _context):
             cur.close()
 
 
-test_event = {
-    "pathParameters": {
-        "id": 2
-    }
-}
-test_context = None
-
-print(lambda_handler(test_event, test_context))
+# test_event = {
+#     "pathParameters": {
+#         "id": 2
+#     }
+# }
+# test_context = None
+#
+# print(lambda_handler(test_event, test_context))
