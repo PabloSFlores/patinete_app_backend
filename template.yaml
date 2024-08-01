@@ -1,0 +1,166 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: >
+  patinete-app-backend
+
+  Sample SAM Template for patinete-app-backend
+
+
+Globals:
+  Function:
+    Timeout: 25
+    MemorySize: 128
+  Api:
+    Cors:
+      AllowMethods: "'GET,POST,PUT,DELETE'"
+      AllowHeaders: "'*'"
+      AllowOrigin: "'*'"
+
+Resources:
+  LambdaExecutionRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: lambda.amazonaws.com
+            Action: sts:AssumeRole
+      Policies:
+        - PolicyName: LambdaExecutionPolicy
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - logs:CreateLogGroup
+                  - logs:CreateLogStream
+                  - logs:PutLogEvents
+                Resource: 'arn:aws:logs:*:*:*'
+        - PolicyName: get-secrets-db-policy
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action: secretsmanager:GetSecretValue
+                Resource: 'arn:aws:secretsmanager:us-west-1:471112501035:secret:prod/musepa/vercel/postgres-REotkz'
+
+  # API Gateway
+  PatineteApi:
+    Type: AWS::Serverless::Api
+    Properties:
+      Name: PatineteApi
+      StageName: Dev
+      Cors:
+        AllowMethods: "'GET,POST,PUT,DELETE'"
+        AllowHeaders: "'*'"
+        AllowOrigin: "'*'"
+
+  # ------------ Patinete ------------
+  ActualizarPatineteFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: modules/patinetes/actualizar_patinete
+      Handler: app.lambda_handler
+      Runtime: python3.12
+      Role: !GetAtt LambdaExecutionRole.Arn
+      Architectures:
+        - x86_64
+      Events:
+        CurrentEventsListIntent:
+          Type: Api
+          Properties:
+            RestApiId: !Ref PatineteApi
+            Path: /actualizar_patinete
+            Method: PUT
+  ConsultarPatineteFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: modules/patinetes/consultar_patinete
+      Handler: app.lambda_handler
+      Runtime: python3.12
+      Role: !GetAtt LambdaExecutionRole.Arn
+      Architectures:
+        - x86_64
+      Events:
+        CurrentEventsListIntent:
+          Type: Api
+          Properties:
+            RestApiId: !Ref PatineteApi
+            Path: /consultar_patinete/{id}
+            Method: GET
+  ConsultarPatinetesFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: modules/patinetes/consultar_patinetes
+      Handler: app.lambda_handler
+      Runtime: python3.12
+      Role: !GetAtt LambdaExecutionRole.Arn
+      Architectures:
+        - x86_64
+      Events:
+        CurrentEventsListIntent:
+          Type: Api
+          Properties:
+            RestApiId: !Ref PatineteApi
+            Path: /consultar_patinetes
+            Method: GET
+  CrearPatineteFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: modules/patinetes/crear_patinete
+      Handler: app.lambda_handler
+      Runtime: python3.12
+      Role: !GetAtt LambdaExecutionRole.Arn
+      Architectures:
+        - x86_64
+      Events:
+        CurrentEventsListIntent:
+          Type: Api
+          Properties:
+            RestApiId: !Ref PatineteApi
+            Path: /crear_patinete
+            Method: POST
+  EliminarPatineteFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: modules/patinetes/eliminar_patinete
+      Handler: app.lambda_handler
+      Runtime: python3.12
+      Role: !GetAtt LambdaExecutionRole.Arn
+      Architectures:
+        - x86_64
+      Events:
+        CurrentEventsListIntent:
+          Type: Api
+          Properties:
+            RestApiId: !Ref PatineteApi
+            Path: /eliminar_patinete/{id}
+            Method: DELETE
+
+Outputs:
+  PatineteApi:
+    Description: "API Gateway endpoint URL for Prod stage for patinete-app-backend api"
+    Value: !Sub "https://${PatineteApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/"
+
+  LambdaExecutionRoleArn:
+    Description: "Implicit IAM Role created for Lambda function"
+    Value: !GetAtt LambdaExecutionRole.Arn
+
+  ActualizarPatineteFunctionArn:
+    Description: "ActualizarPatineteFunction Lambda function ARN"
+    Value: !GetAtt ActualizarPatineteFunction.Arn
+  ConsultarPatineteFunctionArn:
+    Description: "ConsultarPatineteFunction Lambda function ARN"
+    Value: !GetAtt ConsultarPatineteFunction.Arn
+  ConsultarPatinetesFunctionArn:
+    Description: "ConsultarPatinetesFunctionFunction Lambda function ARN"
+    Value: !GetAtt ConsultarPatinetesFunction.Arn
+  CrearPatineteFunctionArn:
+    Description: "CrearPatineteFunction Lambda function ARN"
+    Value: !GetAtt CrearPatineteFunction.Arn
+  EliminarPatineteFunctionArn:
+    Description: "EliminarPatineteFunction Lambda function ARN"
+    Value: !GetAtt EliminarPatineteFunction.Arn
+
