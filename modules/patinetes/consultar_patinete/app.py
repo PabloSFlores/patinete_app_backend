@@ -4,6 +4,12 @@ from psycopg2.extras import RealDictCursor
 
 from connect_db import get_db_connection
 
+headers = {
+    'Access-Control-Allow-Headers': '*',
+    'Access-Control-Allow-Origin': '*',
+    'Access-Control-Allow-Methods': 'GET'
+}
+
 
 def lambda_handler(event, _context):
     conn = None
@@ -23,18 +29,29 @@ def lambda_handler(event, _context):
         entity = cur.fetchone()
 
         if not entity:
-            return {"statusCode": 204, "body": json.dumps({"message": "Patinete no encontrado."})}
+            return {
+                "statusCode": 204,
+                "body": json.dumps({"message": "Patinete no encontrado."}),
+                "headers": headers
+            }
 
-        return {'statusCode': 200, 'body': json.dumps({'data': entity})}
+        return {
+            'statusCode': 200,
+            'body': json.dumps({'data': entity}),
+            'headers': headers
+        }
     except Exception as e:
-        return {'statusCode': 500, 'body': json.dumps({"error": str(e)})}
+        return {
+            'statusCode': 500,
+            'body': json.dumps({"error": str(e)}),
+            'headers': headers
+        }
     finally:
         # Close connection and cursor
         if conn is not None:
             conn.close()
         if cur is not None:
             cur.close()
-
 
 # test_event = {
 #     "pathParameters": {
